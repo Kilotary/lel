@@ -1,4 +1,5 @@
 import requests
+import lxml.html as html
 import datetime
 
 class LelKekBot:
@@ -25,41 +26,41 @@ class LelKekBot:
         params = {"chat_id":chatId, "text":text}
         method = 'sendMessage'
         response = requests.post(self.apiUrl+method,params)
-        return response
+
+    def getYoutubeFirstResult(self, url, searchparam):
+        search = "/results?search_query="
+        req = requests.get(url + search + searchparam )
+        ydoc = html.document_fromstring(req.text())
+        for a in ydoc.xpath("//a"):
+            res = a.get('href')
+            if res[1:6] == 'watch':
+                break
+        return url + res    
 
 token = "700076471:AAG9HAUfDiPKH4QWaD995F68Pga2cE2q5KA"
 bot = LelKekBot(token)
-greet = ('здраствуй','привет','ку','хдорово')
-now = datetime.datetime.now()
-
+youtubeURL = "http://youtube.com"   
 def main():
     newOffset = None
-    today = now.day
-    hour = now.hour
 
     while True:
         bot.getUpdates(newOffset)
-
         lastUpdate = bot.getLastUpdate()
 
-        lastUpdateId = lastUpdate['update_id']
-        lastChatText = lastUpdate['message']['text']
-        lastChatId = lastUpdate['message']['chat']['id']
-        lastChatName = lastUpdate['message']['chat']['first_name']
-        bot.sendMess(lastChatId,'Huli Nado,{}'.format(lastChatName))
-
-
-        
-        if lastChatText.lower() in greet and today == now.day and 6<=hour<=12:
-            bot.sendMess(lastChatId,'Доброе утро,{}'.format(lastChatName))
-            today += 1
-        if lastChatText.lower() in greet and today ==now.day and 12<=hour<=17:
-            bot.sendMess(lastChatId,'Доброе день,{}'.format(lastChatName))
-            today += 1
-        if lastChatText.lower() in greet and today ==now.day and 17<=hour<=23:
-            bot.sendMess(lastChatId,'Доброе вечер,{}'.format(lastChatName))
-            today += 1    
-
+        lastUpdateId = bot.lastUpdate['update_id']
+        lastChatText = bot.lastUpdate['message']['text']
+        lastChatId = bot.lastUpdate['message']['chat']['id']
+        lastChatName = bot.lastUpdate['message']['chat']['first_name']
+        lastChatTextSplit = lastChatText.split()
+        searchparam = ''
+    
+        if lastChatTextSplit[0].lower() == '!vid':
+            for p in lastChatUpdateSplit:
+                searchparam += p + '+'
+            searchparam = searchparam[0,-1]
+            res = bot.getYoutubeFirstResult(youtubeURL, searchparam)
+            bot.sendMess(lastChatId, res)
+            
         newOffset = lastUpdateId +1    
 
 if __name__ == '__main__':
@@ -67,3 +68,6 @@ if __name__ == '__main__':
         main()
     except KeyboardInterrupt:
         exit()
+        
+
+
