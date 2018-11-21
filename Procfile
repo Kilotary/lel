@@ -1,1 +1,1 @@
-web: python lolkekbot.py
+app: python lolkekbot.py
