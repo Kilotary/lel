@@ -1,5 +1,4 @@
 import requests
-import lxml.html as html
 from apiclient.discovery import build
 from apiclient.errors import HttpError
 
